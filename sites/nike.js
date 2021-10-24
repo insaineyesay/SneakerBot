@@ -1,5 +1,7 @@
 const { getCardDetailsByFriendlyName } = require('../helpers/credit-cards');
 
+const defaultTimeout = 2000;
+
 async function enterAddressDetails({ page, address }) {
   try {
     const firstNameSelector = 'input[name="address.firstName"]';
@@ -14,36 +16,36 @@ async function enterAddressDetails({ page, address }) {
     await page.type(firstNameSelector, address.first_name, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(lastNameSelector);
     await page.type(lastNameSelector, address.last_name, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(address1Selector);
     await page.type(address1Selector, address.address_line_1, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(address2Selector);
     await page.type(address2Selector, address.address_line_2, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(citySelector);
     await page.type(citySelector, address.city, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     try {
       await page.waitForSelector(stateSelector);
       await page.select(stateSelector, address.state);
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(defaultTimeout);
     } catch (err) {
       // no op if timeout waiting for state selector
     }
@@ -52,7 +54,7 @@ async function enterAddressDetails({ page, address }) {
     await page.type(postalCodeSelector, address.postal_code, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
   } catch (err) {
     throw err;
   }
@@ -62,7 +64,7 @@ async function checkout({
   taskLogger,
   page,
   shippingAddress,
-  shippingSpeedIndex,
+  // shippingSpeedIndex,
   billingAddress,
   cardFriendlyName
 }) {
@@ -87,7 +89,7 @@ async function checkout({
     const phoneNumberSelector = 'input[name="address.phoneNumber"]';
     const shippingAddressSubmitButtonSelector = 'button.js-next-step.saveAddressBtn';
 
-    const shippingSpeedsSelector = 'div.shippingOptionsSelectorContainer';
+    // const shippingSpeedsSelector = 'div.shippingOptionsSelectorContainer';
     const shippingSpeedSubmitButtonSelector = 'button.js-next-step.continuePaymentBtn';
 
     const cardDetailsIframeSelector = 'iframe.credit-card-iframe.mt1.u-full-width.prl2-sm';
@@ -102,11 +104,11 @@ async function checkout({
 
     await page.waitForSelector(enterAddressManuallyButtonSelector);
     await page.click(enterAddressManuallyButtonSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(address2ExpandButtonSelector);
     await page.click(address2ExpandButtonSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     taskLogger.info('Entering shipping details');
     await enterAddressDetails({ page, address: shippingAddress });
@@ -115,27 +117,28 @@ async function checkout({
     await page.type(emailSelector, shippingAddress.email_address, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(phoneNumberSelector);
     await page.type(phoneNumberSelector, shippingAddress.phone_number, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(shippingAddressSubmitButtonSelector);
     await page.click(shippingAddressSubmitButtonSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
-    taskLogger.info('Selecting desired shipping speed');
-    await page.waitForSelector(shippingSpeedsSelector);
-    const shippingSpeeds = await page.$$(shippingSpeedsSelector);
-    await shippingSpeeds[shippingSpeedIndex].click();
-    await page.waitForTimeout(2000);
+    // taskLogger.info('Selecting desired shipping speed');
+    taskLogger.info('Continuing with default shipping speed');
+    // await page.waitForSelector(shippingSpeedsSelector);
+    // const shippingSpeeds = await page.$$(shippingSpeedsSelector);
+    // await shippingSpeeds[shippingSpeedIndex].click();
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(shippingSpeedSubmitButtonSelector);
     await page.click(shippingSpeedSubmitButtonSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     taskLogger.info('Entering card details');
     await page.waitForSelector(cardDetailsIframeSelector);
@@ -146,15 +149,17 @@ async function checkout({
     // have to manually set the value
     await frame.evaluate(({ creditCardNumberSelector: creditCardNumberSelectorStr, cardDetails: cardDetailsObj }) => {
       const fieldHandle = document.querySelector(creditCardNumberSelectorStr);
+      // taskLogger.info('CC Number selector string is: ', creditCardNumberSelectorStr);
+      // taskLogger.info('Card detailsObj is: ', cardDetailsObj);
       fieldHandle.value = cardDetailsObj.cardNumber;
     }, { creditCardNumberSelector, cardDetails });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await frame.click(creditCardNumberSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await frame.click(creditCardExpirationDateSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
     await frame.type(
       creditCardExpirationDateSelector,
       String(cardDetails.expirationMonth).concat(cardDetails.expirationYear),
@@ -162,23 +167,23 @@ async function checkout({
         delay: 10
       }
     );
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await frame.type(creditCardCVVSelector, cardDetails.securityCode, {
       delay: 10
     });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(differentBillingAddressSelector);
     await page.click(differentBillingAddressSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     taskLogger.info('Entering billing details');
     await enterAddressDetails({ page, address: billingAddress });
 
     await page.waitForSelector(billingAddressSubmitButtonSelector);
     await page.click(billingAddressSubmitButtonSelector);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(defaultTimeout);
 
     await page.waitForSelector(orderSubmitButtonSelector);
     await page.click(orderSubmitButtonSelector);
@@ -243,7 +248,7 @@ exports.guestCheckout = async ({
         const styles = await page.$$(stylesSelector);
         await styles[styleIndex].click();
         taskLogger.info('Selected style by index');
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(defaultTimeout);
       } catch (err) {
         // no op if timeout waiting for style selector
       }
@@ -302,7 +307,7 @@ exports.guestCheckout = async ({
           button.click();
         }
       }, atcButtonSelector);
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(defaultTimeout);
 
       const cartSelector = 'span.pre-jewel.pre-cart-jewel.text-color-primary-dark';
       await page.waitForSelector(cartSelector);

@@ -1,7 +1,7 @@
 require('dotenv-flow').config();
 
 const local = {
-  client: 'pg',
+  client: 'postgresql',
   connection: {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -26,6 +26,7 @@ const docker = {
 };
 
 module.exports = {
+  client: local.client,
   local,
   test: local,
   docker

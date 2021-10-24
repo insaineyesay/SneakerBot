@@ -34,7 +34,7 @@
     "express": "^4.17.1",
     "express-validation": "^3.0.8",
     "joi": "^17.4.0",
-    "knex": "^0.21.19",
+    "knex": "^0.95.11",
     "knex-mock-client": "^1.5.1",
     "nodemailer": "^6.6.1",
     "pg": "^8.6.0",
